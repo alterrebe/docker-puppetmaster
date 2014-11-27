@@ -1,6 +1,8 @@
 #
 # Puppet Master running with Apache/Passenger and Librarian-Puppet. No dashboard, no PuppetDB.
 #
+# This work is based on https://github.com/arcus-io/docker-puppetmaster
+#
 FROM ubuntu:trusty
 MAINTAINER Uri Savelchev <alterrebe@gmail.com>
 

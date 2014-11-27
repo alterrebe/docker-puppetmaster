@@ -13,7 +13,7 @@ else
 	echo "* Terminating Puppet Master to run it again with Passenger"
 	kill $PM_PID
 	echo "* Fix Apache vhost config"
-	sed -i "s,SSLCertificateFile[[:space:]]\+/var/.*$,SSLCertificateFile\t/var/lib/puppet/ssl/certs/$HOSTNAME.pem,;s,SSLCertificateKeyFile[[:space:]]\+/var/.*$,SSLCertificateKeyFile\t/var/lib/puppet/ssl/private_keys/$HOSTNAME.pem," /etc/apache2/sites-available/puppetmaster.conf
+	sed -i "s,\(SSLCertificateFile\)[[:space:]]\+/.*$,\1\t/var/lib/puppet/ssl/certs/$HOSTNAME.pem,;s,\(SSLCertificateKeyFile\)[[:space:]]\+/.*$,\1\t/var/lib/puppet/ssl/private_keys/$HOSTNAME.pem," /etc/apache2/sites-available/puppetmaster.conf
 fi
 
 exec /usr/sbin/apache2ctl -D FOREGROUND
