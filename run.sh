@@ -1,26 +1,19 @@
 #!/bin/sh
-PUPPET_DASHBOARD_URL=${PUPPET_DASHBOARD_URL:-http://localhost:3000}
 
-cat << EOF > /etc/puppet/puppet.conf
-[main]
-  pluginsync = true
+HOSTNAME=`hostname`
 
-[master]
-  allow_duplicate_certs = True
-  ssldir = /var/lib/puppet/ssl
-  node_name = facter
-  facts_terminus = yaml
-  modulepath = /opt/arcus/modules:/etc/puppet/modules
-  node_terminus = exec
-  external_nodes = /usr/bin/env PUPPET_DASHBOARD_URL=$PUPPET_DASHBOARD_URL /usr/share/puppet-dashboard/bin/external_node
-  data_binding_terminus = hiera
-  hiera_config = /etc/hiera.yaml
-  storeconfigs = true
-  storeconfigs_backend = puppetdb
-  reports = store, http, puppetdb
+if [ -f /var/lib/puppet/ssl/certs/$HOSTNAME.pem ]; then
+	echo "* Correct SSL certificates are already generated"
+else
+	echo "* Remove old certificates and run Puppet Master to regenerate them"
+	rm -rf /var/lib/puppet/ssl/*
+	puppet master --no-daemonize --verbose &
+	PM_PID=$!
+	sleep 10
+	echo "* Terminating Puppet Master to run it again with Passenger"
+	kill $PM_PID
+	echo "* Fix Apache vhost config"
+	sed -i "s,SSLCertificateFile[[:space:]]\+/var/.*$,SSLCertificateFile\t/var/lib/puppet/ssl/certs/$HOSTNAME.pem,;s,SSLCertificateKeyFile[[:space:]]\+/var/.*$,SSLCertificateKeyFile\t/var/lib/puppet/ssl/private_keys/$HOSTNAME.pem," /etc/apache2/sites-available/puppetmaster.conf
+fi
 
-[agent]
-  ssldir = /var/lib/puppet/ssl
-EOF
-
-supervisord -c /opt/supervisor.conf -n
+exec /usr/sbin/apache2ctl -D FOREGROUND
