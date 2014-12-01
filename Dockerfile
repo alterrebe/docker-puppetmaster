@@ -33,7 +33,9 @@ RUN gem install --no-ri --no-rdoc librarian-puppet
 ADD hiera.yaml /etc/hiera.yaml
 RUN ln -s /etc/hiera.yaml /etc/puppet/hiera.yaml
 
+RUN tar cC /etc/puppet -jf /root/etc-puppet.tar.bz2 .
 ADD run.sh /usr/local/bin/run
 
 EXPOSE 8140
 CMD ["/usr/local/bin/run"]
+VOLUME /etc/puppet

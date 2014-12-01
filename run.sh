@@ -2,6 +2,13 @@
 
 HOSTNAME=`hostname`
 
+if [ -f /etc/puppet/puppet.conf ]; then
+	echo "* /etc/puppet contains the Puppet conf file"
+else
+	echo "* Unpack puppet configuration files archive"
+	tar xjf /root/etc-puppet.tar.bz2 -C /etc/puppet
+fi
+
 if [ -f /var/lib/puppet/ssl/certs/$HOSTNAME.pem ]; then
 	echo "* Correct SSL certificates are already generated"
 else
